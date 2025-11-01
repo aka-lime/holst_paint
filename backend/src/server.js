@@ -10,7 +10,8 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const frontendPath = path.join(__dirname, '..', '..', 'frontend');
-const HISTORY_LIMIT = 1000;
+// Keep last N strokes (not individual segments)
+const STROKE_LIMIT = parseInt(process.env.STROKE_LIMIT || '300', 10);
 const SESSION_COOKIE_NAME = 'sessionId';
 const SESSION_COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 30; // 30 days
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -40,6 +41,22 @@ const hydrateSessionsFromDisk = () => {
 };
 
 const sessions = hydrateSessionsFromDisk();
+
+// Keep only last STROKE_LIMIT distinct strokes in session.history
+function enforceStrokeLimit(session) {
+    // Collect last STROKE_LIMIT distinct strokeIds walking from the end
+    const keepIds = [];
+    const seen = new Set();
+    for (let i = session.history.length - 1; i >= 0 && keepIds.length < STROKE_LIMIT; i--) {
+        const id = session.history[i] && session.history[i].strokeId;
+        if (id != null && !seen.has(id)) {
+            seen.add(id);
+            keepIds.push(id);
+        }
+    }
+    const keep = new Set(keepIds);
+    session.history = session.history.filter(a => keep.has(a.strokeId));
+}
 
 const snapshotSessions = () => {
     const snapshot = {};
@@ -157,9 +174,7 @@ wss.on('connection', (ws) => {
                 case 'draw':
                     const action = { segment: data.data.segment, userId: ws.userId, strokeId: data.data.strokeId };
                     session.history.push(action);
-                    if (session.history.length > HISTORY_LIMIT) {
-                        session.history.shift();
-                    }
+                    enforceStrokeLimit(session);
                     broadcastToOthers(JSON.stringify({ type: 'draw', data: action }));
                     schedulePersistSessions();
                     break;
