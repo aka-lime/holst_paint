@@ -11,10 +11,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: white;
             /* Background is now handled by pseudo-elements */
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         body::before,
@@ -64,6 +66,9 @@
             align-items: center;
             padding: 10px 20px;
             margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
 
             /* Glassmorphism Effect */
             background: rgba(255, 255, 255, 0.1);
@@ -109,7 +114,7 @@
         /* The new custom panel */
         #custom-color-panel {
             position: absolute;
-            top: 100px;
+            top: 120px;
             /* Position below controls */
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -131,6 +136,7 @@
             transform: translateY(-20px) scale(0.95);
             opacity: 0;
             pointer-events: none;
+            max-width: 340px;
         }
 
         #custom-color-panel.visible {
@@ -245,13 +251,52 @@
         }
 
         canvas {
-            height: 80vh;
-            width: 80vh;
-            max-width: 95vw;
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            aspect-ratio: 1 / 1;
             background-color: white;
             border-radius: 20px;
             border: none;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            touch-action: none;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px 12px 24px;
+            }
+
+            #session-title {
+                position: static;
+                margin-bottom: 12px;
+                text-align: center;
+            }
+
+            .controls {
+                width: 100%;
+                margin: 10px 0 18px;
+                padding: 12px;
+                gap: 10px;
+            }
+
+            #custom-color-panel {
+                position: fixed;
+                top: auto;
+                bottom: 20px;
+                left: 50%;
+                transform: translate(-50%, 20px);
+                width: calc(100% - 40px);
+                max-width: 360px;
+            }
+
+            #custom-color-panel.visible {
+                transform: translate(-50%, 0);
+            }
+
+            canvas {
+                max-width: 640px;
+            }
         }
     </style>
 </head>
