@@ -27,18 +27,21 @@ window.addEventListener('load', () => {
 
     // --- Session Management ---
     let sessionId = null;
-    const path = window.location.pathname;
+    const sessionMatch = window.location.pathname.match(/\/session\/([^/]+)/);
 
-    if (path.startsWith('/session/')) {
-        sessionId = path.split('/')[2];
+    if (sessionMatch && sessionMatch[1]) {
+        sessionId = decodeURIComponent(sessionMatch[1]);
         sessionTitle.textContent = `Session: ${sessionId}`;
     } else {
-        // This case should ideally not be hit if server redirect works
+        // If we somehow land on the page without a session, go back to root
         sessionTitle.textContent = 'Redirecting to a new session...';
+        window.location.replace('/');
+        return;
     }
 
     // --- WebSocket Connection ---
-    const socket = new WebSocket(`ws://${window.location.host}`);
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${protocol}://${window.location.host}`);
 
     socket.onopen = () => {
         if (sessionId) {
