@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: текущий файл",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: module (-m)",
+            "type": "python",
+            "request": "launch",
+            "module": "your_package.entrypoint",
+            "console": "integratedTerminal"
+        }
+    ]
+}
